@@ -37,7 +37,6 @@
 \usepackage{tabularx}
 \usepackage{ltxtable}
 \usepackage[style=ieee]{biblatex}
-\bibliography{CD.bib}
 \usepackage[nottoc]{tocbibind}
 \usepackage[official]{eurosym}
 \usepackage{gensymb}
@@ -46,7 +45,7 @@
 \usepackage{mathtools}
 \usepackage[nice]{nicefrac}
 \usepackage{tikz}
-\usetikzlibrary{arrows,automata,babel,positioning}
+\usetikzlibrary{arrows,automata,babel,positioning,calc}
 \usepackage{%
     array, %%An ex­tended im­ple­men­ta­tion of the ar­ray and tab­u­lar en­vi­ron­ments which ex­tends the op­tions for col­umn for­mats, and pro­vides "pro­grammable" for­mat spec­i­fi­ca­tions
     booktabs, %%The pack­age en­hances the qual­ity of ta­bles in LATEX, pro­vid­ing ex­tra com­mands as well as be­hind-the-scenes op­ti­mi­sa­tion
@@ -55,7 +54,6 @@
     shortvrb,
     units,
     url,
-    lastpage,
     longtable,
     lscape,
     qtree,
@@ -67,6 +65,9 @@
     libertine,
     fancyhdr,
 }
+
+% Necessary packages for the titlepage:
+\usepackage{comment}
 
 \newcommand{\bigO}[1]{%
   \text{\usefont{OMS}{cmsy}{m}{n}O}\left(#1\right)%
@@ -178,7 +179,7 @@
 %% DOCUMENT
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \author{Javier Alonso Silva}
-\title{Análisis de contenedores Docker y sus implicaciones de seguridad}
+\title{Análisis de contenedores Docker}
 \date{2021}
 \pagestyle{fancy}
 \fancyhf{}
@@ -194,8 +195,12 @@
 
 \settttsize{\footnotesize}
 \ActivateVerbatimLigatures
-\maketitle
+% \maketitle
+\include{base/titlepage}
+
+\newpage
 \begin{abstract}
+  TO--DO
 \end{abstract}
 
 \end{document}
