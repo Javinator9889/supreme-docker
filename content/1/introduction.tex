@@ -43,11 +43,41 @@ todos usamos y que conecta más de 4 billones de dispositivos (figura \ref{fig:i
 \end{figure}
 
 El problema a esto es evidente: con una mayor capacidad de cómputo, con más opciones
-de comunicación y con más posibilidad de almacenar cosas, los requisitos de las
+de comunicación y con más posibilidad de almacenar datos, los requisitos de las
 aplicaciones van creciendo y creciendo y cada vez son más complejos de satisfacer,
 no necesariamente a nivel \textit{hardware} (que por lo general suele acompañar)
 sino a nivel \textit{software}. Como las aplicaciones se orientan a los usuarios
 es necesario añadir capas de abstracción (como el sistema operativo) para facilitar
 la labor a la persona. Sin embargo, cada capa nueva que se añade dificulta las tareas
 de despliegue y mantenimiento dado que existe una gran variedad de combinaciones
-\textit{hardware} y cada una puede estar con un OS distinto.
+\textit{hardware} y cada una puede estar con un sistema operativo distinto.
+
+Por otra parte, la extensión de dependencias y posible incompatibilidad entre ellas
+suele desembocar en el uso de versiones desactualizadas de una librería ya que tendríamos
+``paquetes rotos''. Esto es tan común que tiene hasta su propio
+término coloquial ``\textit{dependency hell}'' \cite{DependencyHell2021}. Contar con
+dependencias obsoletas que ya han cumplido con su ciclo de vida \textit{software}
+conlleva unas implicaciones de seguridad bastante severas:
+
+\begin{itemize}
+    \item Si un \textit{software} no ha mejorado a lo largo del tiempo, existe una
+          malicia humana que puede aprovecharse de distintos \textit{exploits}
+          existentes y comprometan nuestra aplicación.
+    \item Un \textit{software} no actualizado puede tener implicaciones directas
+          sobre el sistema en que se ejecuta, pudiendo producir fallos en el mismo.
+          Esto se debe principalmente a que el \textit{hardware} sigue mejorando y
+          creciendo y un \textit{software} antiguo puede presentar \textit{bugs}
+          en dispositivos modernos que no presentaría en antiguos.
+    \item Un \textit{software} no actualizado puede comprometer otros elementos del
+          sistema en que se ejecuta. Por ejemplo, una aplicación `A' hace uso de dicho \textit{software}
+          y una aplicación `B' también. Sin embargo, la última aplicación se ha diseñado
+          para trabajar con la última versión del \textit{software} pero la aplicación
+          `A' solo puede funcionar con una versión antigua e insegura. Por consiguiente,
+          pese a que la aplicación `B' funcionaría correctamente el hecho de usar una
+          versión antigua e insegura del \textit{software} compromete directamente al
+          sistema y a la aplicación.
+\end{itemize}
+
+Es por eso que existen alternativas como ``\texttt{chroot}'' y máquinas virtuales para
+subsanar estos problemas. Sin embargo, en los últimos años ha aparecido una herramienta
+muy sonada y con gran éxito: Docker y los contenedores.
