@@ -142,6 +142,51 @@
   organization = {{Medium}}
 }
 
+@online{ManageDataDocker2021,
+  title = {Manage Data in {{Docker}}},
+  date = {2021-06-02T22:25:22+00:00},
+  url = {https://docs.docker.com/storage/},
+  urldate = {2021-06-04},
+  abstract = {Overview of persisting data in containers},
+  file = {/home/javinator9889/Zotero/storage/A9IZYS9K/storage.html},
+  langid = {english},
+  organization = {{Docker Documentation}}
+}
+
+@inreference{UnionFS2020,
+  title = {UnionFS},
+  booktitle = {Wikipedia, la enciclopedia libre},
+  date = {2020-07-02T14:04:53Z},
+  url = {https://es.wikipedia.org/w/index.php?title=UnionFS&oldid=127421790},
+  urldate = {2021-06-04},
+  abstract = {UnionFS es un servicio para sistemas de archivos de Linux que permite montar un sistema de archivos formado por la unión de otros sistemas de archivos de Linux. Permite que archivos y directorios de sistemas de archivos distintos, conocidos como ramas, se superpongan de forma transparente, formando un único sistema de archivos. Los contenidos de directorios que tienen la misma ruta en las ramas que se combinan aparecerán juntos en un único directorio en el nuevo sistema de archivos virtual. UnionFS se utiliza principalmente en LiveCD o sistemas sin disco, donde el directorio raíz de solo lectura se combina con un sistema de archivos tmpfs (que reside en memoria y es modificable). De este modo, todos los archivos de la raíz de solo lectura pueden ser modificados, y la modificación se mantiene en memoria. Las diferentes ramas pueden ser sistemas de archivos de solo lectura o lectura y escritura, de forma que las escrituras al sistema de archivos virtual combinado pueden realizarse sobre un sistema de archivos real concreto. Esto lleva a otro útil propósito de las uniones de sistemas de archivos, que es hacer que un sistema de archivos parezca modificable, pero sin permitir realmente que las escrituras modifiquen el sistema de archivos, también conocido como copia en escritura. Esto puede ser deseable cuando el medio es físicamente de solo lectura, como en el caso de los CD-ROMs, o para utilizar una única plantilla común para varios sistemas de archivos, o quizás por razones de seguridad. La implementación de Linux, UnionFS, se utiliza algunas veces como un sistema de imágenes (snapshot) ad hoc. A la hora de montar ramas, la prioridad de una rama sobre otra es especificada. De este modo, cuando ambas ramas contienen un archivo con el mismo nombre, uno tiene prioridad sobre el otro. En los LiveCDs se utiliza para superponer un sistema de archivos modificable sobre un medio de solo lectura. En Knoppix por ejemplo la unión del sistema de archivos en el CD-ROM o DVD puede hacerse con el sistema de archivos contenido en una imagen llamada knoppix.img en una memoria USB que tenga prioridad sobre el sistema de archivos de solo lectura. El usuario ve un sistema de archivos en el que es posible añadir y cambiar archivos en cualquier sitio. Lo que ocurre en el nivel físico es que si un archivo pertenece a la rama de solo lectura es reemplazada con una nueva versión que se almacena en el archivo de imagen. Dado que el sistema de archivos de unión combina las dos ramas de forma transparente, el usuario simplemente ve la nueva versión.},
+  annotation = {Page Version ID: 127421790},
+  file = {/home/javinator9889/Zotero/storage/WWG98ZVU/index.html},
+  langid = {spanish}
+}
+
+@online{UseBindMounts2021,
+  title = {Use Bind Mounts},
+  date = {2021-06-02T22:25:22+00:00},
+  url = {https://docs.docker.com/storage/bind-mounts/},
+  urldate = {2021-06-04},
+  abstract = {Using bind mounts},
+  file = {/home/javinator9889/Zotero/storage/EYF2F9FD/bind-mounts.html},
+  langid = {english},
+  organization = {{Docker Documentation}}
+}
+
+@online{UseVolumes2021,
+  title = {Use Volumes},
+  date = {2021-06-02T22:25:22+00:00},
+  url = {https://docs.docker.com/storage/volumes/},
+  urldate = {2021-06-04},
+  abstract = {Using volumes},
+  file = {/home/javinator9889/Zotero/storage/4K8K8M2Q/volumes.html},
+  langid = {english},
+  organization = {{Docker Documentation}}
+}
+
 @online{wattsStateContainersToday,
   title = {The {{State}} of {{Containers Today}}: {{A Report Summary}}},
   shorttitle = {The {{State}} of {{Containers Today}}},
