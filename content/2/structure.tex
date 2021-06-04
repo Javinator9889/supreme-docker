@@ -220,3 +220,52 @@ unos casos para unos o para otros, según se requiera (tabla \ref{tab:mount-case
 \end{landscape}
 
 \subsubsection*{Interfaces de red}
+Docker ofrece un potente mecanismo de gestión de redes para permitir la comunicación
+entre contenedores y con elementos externos. Una de las motivaciones principales
+detrás de la gestión propia de la red por parte de Docker es la de que las aplicaciones
+no sepan si están dentro de un contenedor o si tienen que comunicarse con el exterior
+o con una carga de trabajo externa a Docker, sino que van a comunicarse directamente
+sin necesidad de ninguna configuración externa.
+
+Indiferentemente de si el servicio se está ejecutando en una máquina Linux y otro en
+una máquina Windows, la comunicación entre ellas se va a realizar completamente
+independiente a la plataforma.
+
+La gestión de las redes y aislamiento de las mismas se realiza mediante una
+manipulación directa de \texttt{iptables}. Esto se hace así porque el \textit{firewall}
+nativo de Linux tiene una grandísima potencia, es muy configurable y se ejecuta
+directamente a nivel de kernel, lo cual reduce el \textit{overhead} que pudiera
+presentar si fuese una aplicación a nivel de usuario.
+
+Esto conlleva que las rutas del \textit{firewall} que se hubiesen creado previamente
+deben aparecer antes de las creadas por Docker (para que tengan mayor peso) y 
+permiten llevar la ejecución de contenedores Docker a distintos tipos de \textit{hardware}:
+servidores, routers (en donde Docker actúa como router) y equipos embebidos.
+
+Por defecto, Docker expone los siguientes drivers \cite{NetworkingOverview2021}:
+
+\begin{itemize}
+    \item \texttt{bridge}: el driver que se usa por defecto, si no se especifica 
+          ninguno. Se destina este tipo de driver cuando las aplicaciones se
+          ejecutan de forma aislada y solo necesitan comunicarse con el exterior o,
+          si por el contrario, hace falta que múltiples contenedores se comuniquen
+          entre sí.
+
+    \item \texttt{host}: elimina el aislamiento de red con el sistema anfitrión,
+          usando la interfaz del sistema (por lo que se debe ajustar
+          el \textit{firewall} y la red, si necesita alguna característica especial).
+        
+    \item \texttt{overlay}: interconecta múltiples servicios de Docker (que pueden
+          estar en máquinas distintas) para facilitar la comunicación entre clústers
+          de Docker Swarm o contenedores entre sí.
+
+    \item \texttt{macvlan}: asigna una dirección MAC al contenedor de forma que parezca
+          que es una máquina física, por lo que se realiza el enrutamiento según las
+          direcciones MAC.
+
+    \item \texttt{none}: deshabilita todas las comunicaciones de red para el
+          contenedor, se suele usar conjunto a un driver personalizado.
+
+    \item \textit{Network plugins}: cada persona puede desarrollar su propio
+          driver de red para que cumpla con una función específica.
+\end{itemize}
