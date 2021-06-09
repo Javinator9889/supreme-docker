@@ -269,3 +269,29 @@ Por defecto, Docker expone los siguientes drivers \cite{NetworkingOverview2021}:
     \item \textit{Network plugins}: cada persona puede desarrollar su propio
           driver de red para que cumpla con una función específica.
 \end{itemize}
+
+\subsubsection*{Interfaz a bajo nivel}
+Docker, para funcionar, necesita del kernel de Linux por debajo. ¿Por qué esta
+caracterización? Todo se debe a medidas de seguridad.
+
+Por lo general, un contenedor de Docker se asemeja mucho a los contenedores LXC 
+de Linux nativos, incluyendo entre otros características de seguridad. Si observamos
+los requisitos de la interfaz Docker (figura \ref{fig:docker-interface}) vemos que
+inclusive hace uso de la librería de LXC:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.3\linewidth]{pictures/Docker-linux-interfaces.png}
+    \caption{Interfaz de Docker con respecto al kernel de Linux. Fuente: Wikipedia \cite{DockerSoftware2021}.}
+    \label{fig:docker-interface}
+\end{figure}
+
+El principal mecanismo de aislamiento son los \textit{Linux kernel namespaces},
+consistentes en una ``venda en los ojos'' hacia los procesos que se ejecutan
+dentro de un contenedor.
+
+Lo siguiente que entra en juego son los \textit{control groups} (\texttt{cgroups}),
+necesarios para limitar el acceso a los recursos del sistema.
+
+Todas estas capas se analizarán en mayor profundidad más adelante, en el punto
+\ref{sec:security}.
