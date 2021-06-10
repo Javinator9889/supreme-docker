@@ -1,0 +1,116 @@
+La creación de un contenedor siempre se realiza de la misma manera: mediante un
+fichero \texttt{Dockerfile}. Los \texttt{Dockerfile} son ficheros del estilo de
+los \texttt{Makefile} que contienen unas reglas básicas que definen lo que será
+una imagen de un contenedor.
+
+El comando que crea una imagen es \lstinline[style=bash]!docker build!, el cual
+toma las instrucciones que aparecen en el fichero y las va ejecutando una a una
+hasta que se produce un error o finaliza correctamente.
+
+Un fichero \texttt{Dockerfile} cuenta con multitud de directivas que permiten
+personalizar y configurar cómo va a funcionar \cite{DockerfileReference2021}.
+Aquí se van a introducir algunas de las más importantes (o las más usadas) \cite{jethvaHowDockerfileWorks}:
+
+\begin{itemize}
+    \item \texttt{FROM}: define una imagen base de partida sobre la que construir.
+    \item \texttt{ADD}: copia ficheros y directorios dentro de la imagen del 
+          contenedor. Además, acepta URLs como parámetro y las descarga
+          directamente dentro.
+    \item \texttt{RUN}: añade capas a la imagen base, instalando aplicaciones,
+          librerías y componentes.
+    \item \texttt{CMD}: especifica qué comandos se deben ejecutar al iniciarse
+          el contenedor. Es importante tener en cuenta que solo puede existir una
+          instrucción \texttt{CMD} en el fichero \texttt{Dockerfile} (si no, se usa solo
+          el último que aparezca). Su funcionalidad principal
+          es la de establecer los valores por defecto de un contenedor en ejecución.
+    \item \texttt{ENTRYPOINT}: es la instrucción ``principal'' de un \texttt{Dockerfile}.
+          Especifica el punto de entrada de un contenedor que se quiere que funcione como
+          un ejecutable. Por ejemplo, el siguiente comando ``\lstinline[style=bash]!docker run -it --rm -p 80:80 nginx!''
+          ejecuta un servidor NGINX de forma interactiva, publica el puerto 80 y, cuando finaliza
+          su ejecución, se elimina.
+    \item \texttt{ENV}: define las variables del entorno del contenedor que se usarán
+          en tiempo de ejecución.
+    \item \texttt{COPY}: con una funcionalidad similar a \texttt{ADD} pero con
+          más limitaciones.
+    \item \texttt{EXPOSE}: define en qué puertos la aplicación estará escuchando.
+    \item \texttt{USER}: especifica el UID (o el nombre del usuario) que se usará
+          internamente en el contenedor para ejecutar las aplicaciones.
+    \item \texttt{VOLUME}: define volúmenes de datos a crear o un punto de montaje del
+          contenedor en tiempo de ejecución.
+    \item \texttt{WORKDIR}: especifica la ubicación en donde se ejecutará el comando
+          en tiempo de ejecución.
+    \item \texttt{LABEL}: especifica etiquetas del contenedor en forma de metadatos.
+          Se conforman de parejas clave--valor que especifican información relativa
+          a la imagen dentro del contenedor como, por ejemplo, la versión, el nombre
+          del paquete, etc.
+\end{itemize}
+
+Por lo general, un \texttt{Dockerfile} comienza con la especificación de una imagen
+de partida (ya que no es habitual crear una imagen desde cero) y, a continuación, se
+procede a instalar diversos paquetes y capas que puedan ser necesarias para nuestra
+aplicación. A continuación se copian los paquetes y requisitos de la aplicación
+dentro de la imagen y se ejecuta la compilación o preparación del paquete, si
+fuera necesario. Finalmente, se especifica el punto de entrada del contenedor y
+los argumentos que recibirá, si recibe. Además, si es necesario se añaden los puertos
+expuestos y volúmenes necesarios para el funcionamiento.
+
+En el código \ref{lst:dockerfile-example} se tiene un ejemplo de un \texttt{Dockerfile}
+completo \cite{BestPracticesWriting2021}:
+
+\begin{lstlisting}[style=Dockerfile, caption={Ejemplo de \texttt{Dockerfile} para una aplicación Go \cite{BestPracticesWriting2021}.}, label={lst:dockerfile-example}]
+# syntax=docker/dockerfile:1
+FROM golang:1.16-alpine AS build
+
+# Install tools required for project
+# Run `docker build --no-cache .` to update dependencies
+RUN apk add --no-cache git
+RUN go get github.com/golang/dep/cmd/dep
+
+# List project dependencies with Gopkg.toml and Gopkg.lock
+# These layers are only re-built when Gopkg files are updated
+COPY Gopkg.lock Gopkg.toml /go/src/project/
+WORKDIR /go/src/project/
+# Install library dependencies
+RUN dep ensure -vendor-only
+
+# Copy the entire project and build it
+# This layer is rebuilt when a file changes in the project directory
+COPY . /go/src/project/
+RUN go build -o /bin/project
+
+# This results in a single layer image
+FROM scratch
+COPY --from=build /bin/project /bin/project
+ENTRYPOINT ["/bin/project"]
+CMD ["--help"]
+\end{lstlisting}
+
+En el fichero anterior se establece una imagen de partida \texttt{golang:1.16-alpine}
+que contiene los binarios de Go en una distribución de muy poco peso (proyecto Linux
+Alpine). Esta imagen se obtiene desde \href{https://hub.docker.com/_/golang}{Docker Hub}.
+
+A continuación, instala el paquete \texttt{git} y el gestor de dependencias de Go.
+Después, copia el proyecto en sí e instala las dependencias en la ruta \texttt{/go/src/project}.
+Finalmente, copia el directorio actual en dicha ruta y define una nueva imagen partiendo
+de la de Golang en donde se ejecuta el proyecto compilado con las opciones
+\texttt{-{}-help} por defecto.
+
+Cuando se define un contenedor es recomendable instalar solo aquellas dependencias
+que sean necesarias. Esto permite una mayor y mejor mantenibilidad, reduce la complejidad
+y el tiempo de construcción de la imagen.
+
+Por otra parte, se recomienda encarecidamente desacoplar la aplicación: por ejemplo,
+un servidor web posiblemente requiera de varias aplicaciones en ejecución. Es recomendable
+separarlas en contenedores y habilitar la comunicación entre ellos a encapsularlo todo
+en un único contenedor. Esto facilita, entre otros, un escalado horizontal en donde
+si se requieren de más imágenes se crean.
+
+Además, el número de capas se debe mantener lo más pequeño posible: las instrucciones
+\texttt{RUN}, \texttt{COPY} y \texttt{ADD} crean capas, mientras que otras instrucciones
+solo crean imágenes intermedias.
+
+Finalmente, es importante construir el \texttt{Dockerfile} teniendo en cuenta que Docker
+usa una caché interna. Si se quiere deshabilitar se puede hacer con la opción
+\lstinline[style=bash]!--no-cache=true! en el comando \lstinline[style=bash]!docker build!.
+Sin embargo, es recomendable hacer uso de la caché interna de Docker ya que agiliza
+el proceso de construcción.
