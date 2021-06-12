@@ -140,9 +140,9 @@
   morestring=[b]"
 }
 \lstdefinelanguage{docker-compose-2}{
-  keywords={version, volumes, services},
+  keywords={version, volumes, services, networks, driver},
   keywordstyle=\color{blue}\bfseries,
-  keywords=[2]{image, environment, ports, container_name, ports, links, build},
+  keywords=[2]{image, environment, ports, container_name, ports, links, build, depends_on, restart, env_file, command, bridge, "unless-stopped", never, always},
   keywordstyle=[2]\color{olive}\bfseries,
   identifierstyle=\color{black},
   sensitive=false,
@@ -278,6 +278,7 @@
 \subsection{Comunicación entre contenedores}
 \input{content/2/communication.tex}
 \subsection{Despliegue de aplicaciones multi--contenedores. \texttt{docker-compose}}
+\input{content/2/compose.tex}
 \subsection{``Orquestación'' de contenedores}\label{sec:swarm}
 \subsection{Líneas futuras de desarrollo e innovación}
 
