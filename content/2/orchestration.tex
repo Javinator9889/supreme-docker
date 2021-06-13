@@ -324,3 +324,230 @@ el navegador o desde el terminal, a la dirección \texttt{http://<node-ip>:<node
 \noindent\rule{\linewidth}{.2pt}
 
 \subsubsection*{Docker Swarm}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.5\linewidth]{pictures/swarm-logo.png}
+    \caption{Logotipo de Docker Swarm \autocite{Swarm}.}
+    \label{fig:docker-logo}
+\end{figure}
+
+Docker Swarm es la solución nativa de Docker para orquestación de contenedores.
+Cuando se hace una instalación de Docker automáticamente se ha instalado el gestor
+Swarm para manejar motores de Docker.
+
+Esta solución es muy interesante ya que no hace falta instalar ninguna herramienta
+externa (como puede ser \texttt{kubectl}) sino que se trabaja directamente desde
+Docker CLI. Durante mucho tiempo esta herramienta no existía de forma nativa sino
+como un proyecto por separado, Docker ``Classic'' Swarm \autocite{DockerClassicswarm2021}.
+Sin embargo, tras la evolución de otras herramientas de gestión y la falta
+de desarrollo de la empresa encargada de dicho repositorio, en 2018 finalizó
+oficialmente su soporte y se pasó a trabajar de forma activa en SwarmKit \autocite{DockerSwarmkit2021}.
+Esta última herramienta se integra de forma nativa en el motor Docker desde
+la versión 1.12 en adelante.
+
+Entre todas las características de Docker Swarm, algunas interesantes son
+\autocite{SwarmModeOverview2021}:
+
+\begin{itemize}
+    \item Gestión de clústeres integrados directamente en el motor Docker, sin 
+          necesidad de \textit{software} adicional para crear o gestionar un Docker Swarm.
+    \item Diseño descentralizado: en lugar de definir quiénes son los nodos y sus
+          roles en el momento del despliegue (como Kubernetes) se gestiona la
+          especialización en tiempo de ejecución. Esto permite generar un clúster
+          de Swarm desde una única imagen y luego decidir quién es quién.
+    \item Modelo de servicios declarativo, en donde se define el estado deseado de
+          varios servicios en el \textit{stack} que conforma la aplicación. Por ejemplo,
+          una aplicación puede estar definida por un servidor web que se comunica con
+          otros servicios mediante una cola de mensajes y una base de datos como
+          \textit{backend}.
+    \item Escalado: por cada servicio se especifican cuántas tareas se quieren
+          desplegar. Cuando se hace un reescalado Docker Swarm se adapta automáticamente
+          añadiendo o eliminando tareas para mantener el estado deseado.
+    \item Gestión del estado deseado: el gestor Swarm monitoriza de forma activa
+          los contenedores y mantiene el estado deseado cuando suceden
+          inconvenientes. Por ejemplo, si se cuenta con un servicio con 10 réplicas
+          y un \textit{host} que tenía 2 falla, Docker Swarm creará dos nuevas
+          réplicas para reemplazar a aquellas que ya no están, asignándolas a los
+          nodos que estén disponibles.
+    \item Red de múltiples \textit{host}: mediante las redes \textit{overlay}, que
+          se vieron anteriormente, varios nodos se interconectan entre sí y
+          se comunican como si no hubiera red de por medio. Docker Swarm se encarga
+          de distribuir las direcciones y gestionar las redes.
+    \item Descubrimiento de servicios: el gestor Swarm asigna un DNS único a cada
+          servicio y hace balanceo de carga automático entre ellos, permitiendo
+          el acceso individual a cada contenedor mediante el nombre DNS asignado.
+    \item Balanceo de carga: se definen los puertos a exponer y automáticamente 
+          Docker Swarm distribuye la carga entre los nodos.
+    \item Seguro por defecto, ya que las comunicaciones utilizan autenticación
+          mútua y cifrado basados en TLS.
+    \item Actualizaciones contínuas: se puede realizar una actualización incremental
+          de cada una de las réplicas y, si en algún momento algo va mal, se puede
+          recuperar la versión anterior.
+\end{itemize}
+
+\subsubsection*{¿Cómo funciona Docker Swarm?}
+La idea principal detrás de este mecanismo de gestión de contenedores es su
+integración directa dentro de Docker. Esto se consigue mediante el uso de la
+herramienta SwarmKit, la cual es un proyecto por separado de Docker que se integra
+en el mismo e implementa la capa de orquestación de Docker.
+
+Por ende, un \textit{swarm} consiste en múltiples \textit{hosts} Docker que se
+ejecutan en modo Swarm y actúan como gestores, esto es, definen la delegación
+y los miembros; o como trabajadores, que ejecutan los servicios de Swarm. Ambos roles
+no son excluyentes, por los que un \textit{host} Docker puede actuar de las
+dos maneras a la vez.
+
+Al definir un Swarm se especifica el estado ideal del mismo: número de réplicas, 
+recursos de memoria y red disponibles, puertos expuestos, etc. Mientras se esté
+ejecutando, Docker intenta mantener ese estado deseado. Por ello, cuando un
+nodo ya no está activo se planifican las tareas pendientes en otro nodo 
+(como se vio anteriormente).
+
+Uno de los factores diferenciales principales de Docker Swarm es que se pueden
+actualizar las configuraciones de los servicios (incluidas redes y almacenamiento)
+sin la necesidad de recrear el servicio: automáticamente, aquellos contenedores
+con una configuración anterior serán reemplazados por los nuevos que cumplan
+con la nueva configuración. Por otra parte, que un anfitrión Docker esté en modo
+Swarm no impide que se puedan ejecutar contenedores de forma estándar en el mismo,
+lo cual brinda una gran potencia a este mecanismo.
+
+Es importante recalcar que la definición de los servicios Swarm se hace a partir
+de un fichero de Docker Compose: si se tiene un conjunto de contenedores
+definidos en un fichero \texttt{docker-compose.yml} versión 3.0 o superior, se
+puede desplegar una pila Swarm desde ese mismo fichero sin necesidad de ninguna
+configuración extra.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{pictures/swarm-arch.jpeg}
+    \caption{Arquitectura de Docker Swarm \autocite{IndepthExplanationSwarm}.}
+    \label{fig:swarm-arch}
+\end{figure}
+
+En la figura \ref{fig:swarm-arch} se define cómo sería la arquitectura de Docker
+Swarm en un entorno ya desplegado. Es importante fijarse en que el sistema, en
+comparación con Kubernetes, es muy similar: hay un punto de entrada, que en
+Kubernetes era el \textit{control plane}, y a continuación el motor de gestión 
+de Swarm, que distribuye las tareas entre contenedores y se encarga de gestionar
+y monitorizar tanto a los nodos como a los recursos. Después, cada motor Docker
+tendrá su aplicación en ejecución y ofrecerá el servicio cuando lo solicite
+\autocite{SwarmModeKey2021}.
+
+\subsubsection*{Los nodos en Swarm}
+Un nodo es una instancia del motor Docker que participa en el clúster. En un mismo
+equipo se pueden ejecutar múltiples nodos Docker, pero en un entorno de producción
+estarán distribuidos a lo largo de un conjunto de múltiples máquinas físicas
+y en la nube.
+
+Cuando se despliega una aplicación en el Swarm se envía el servicio al nodo gestor.
+Dicho nodo genera unidades de trabajo (tareas) y las reparte entre los nodos
+trabajadores. Por otra parte, dichos nodos también definen la orquestación y las
+funciones de gestión del clúster requeridas para mantener el estado deseado.
+
+De esta forma, los nodos trabajadores reciben y ejecutan las tareas recibidas por
+el nodo gestor. Por defecto, todos los nodos son nodos trabajadores pero se puede
+configurar y especificar que un nodo en particular sea únicamente un gestor.
+Cuando un nodo trabajador finaliza su tarea, notifica al nodo gestor para que este
+pueda perseverar el estado del sistema como se espera \autocite{SwarmModeKey2021}.
+
+\subsubsection*{Los servicios y las tareas}
+Un servicio es una definición de tarea que se ejecuta en un nodo trabajador dentro
+de un clúster Swarm, definiendo así la estructura principal de Docker Swarm y la
+interacción principal de un usuario con el mismo.
+
+Los servicios al final son imágenes Docker con un comando asociado a los mismos,
+que luego se convertirán en contenedores en ejecución. En particular, un servicio
+puede estar replicado y será distribuido entre varias réplicas; o bien el
+servicio es global y se ejecutará en todos los nodos Swarm \autocite{SwarmModeKey2021}.
+
+\subsubsection*{Balanceo de carga}
+Una de las características principales de Docker Swarm es el uso de ``Ingress'' como
+gestor de la carga para exponer los servicios y repartir el trabajo entre los nodos.
+Esto se consigue asignando manualmente un puerto donde se quiera publicar la 
+aplicación o bien se designará automáticamente.
+
+De esta forma, proveedores externos acceden directamente al puerto expuesto
+y Swarm gestionará las peticiones entre los distintos servicios, de manera que
+en apariencia se accede siempre al mismo nodo. Internamente se usa un servicio
+DNS que se asigna automáticamente a cada tarea y, gracias al balanceador de carga
+nativo que tiene, distribuye las peticiones.
+
+\subsubsection*{Ejemplo de aplicación en Docker Swarm}
+Una de las grandes ventajas que presenta Docker Swarm es que utiliza la
+sintaxis de Docker Compose para definir sus servicios, con algunos añadidos
+no soportados por el mismo.
+
+Para este ejemplo, se va a desplegar una instancia de GitLab CE con hasta
+cuatro réplicas para operaciones de CI/CD automatizadas. El fichero que lo
+define es (código \ref{lst:gitLab}):
+
+\begin{lstlisting}[style=docker-compose, caption={\texttt{docker-compose.yml} para una instancia de GitLab y 4 \textit{runners}.}, label={lst:gitlab}]
+version: "3.6"
+services:
+  gitlab:
+    image: gitlab/gitlab-ee:latest
+    ports:
+      - "22:22"
+      - "80:80"
+      - "443:443"
+    volumes:
+      - $GITLAB_HOME/data:/var/opt/gitlab
+      - $GITLAB_HOME/logs:/var/log/gitlab
+      - $GITLAB_HOME/config:/etc/gitlab
+    environment:
+      GITLAB_OMNIBUS_CONFIG: "from_file('/omnibus_config.rb')"
+    configs:
+      - source: gitlab
+        target: /omnibus_config.rb
+    secrets:
+      - gitlab_root_password
+  gitlab-runner:
+    image: gitlab/gitlab-runner:alpine
+    deploy:
+      mode: replicated
+      replicas: 4
+configs:
+  gitlab:
+    file: ./gitlab.rb
+secrets:
+  gitlab_root_password:
+    file: ./root_password.txt
+\end{lstlisting}
+
+En el fichero anterior se puede ver que la estructura es muy similar a la de
+Docker Compose. Sin embargo, aparecen algunas claves nuevas que no existían con
+anterioridad:
+
+\begin{itemize}
+    \item \texttt{services} define los servicios que conformarán la aplicación.
+    \item \texttt{deploy} define el modo de despliegue (\texttt{mode}) y la cantidad
+          de réplicas que se usarán (\texttt{replicas}). Si no se especifica, se
+          usa una única réplica.
+    \item \texttt{configs} define de forma común la configuración que tendrán las
+          réplicas.
+    \item \texttt{secrets} define contraseñas o información sensible que necesitarán
+          las réplicas en tiempo de ejecución.
+\end{itemize}
+
+Aunque en este caso se haya usado un fichero \texttt{docker-compose.yml} adaptado
+para Docker Swarm, se podría perfectamente haber usado el fichero descrito en
+el apartado \ref{sec:compose} en el que se desplegaba una aplicación 
+Wordpress con NGINX y MySQL.
+
+Se definen los ficheros necesarios y se pasa a desplegar el servicio (figura \ref{fig:gitlab-swarm}):
+
+\begin{lstlisting}[style=bash, caption={}]
+docker stack deploy --compose-file docker-compose.yml gitlab-stack
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.7\linewidth]{pictures/gitlab-swarm.png}
+    \caption{Despliegue del Swarm con GitLab en su interior.}
+    \label{fig:gitlab-swarm}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{pictures/gitlab-deployed.png}
+\end{figure}
