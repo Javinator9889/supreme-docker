@@ -152,6 +152,19 @@
   morestring=[b]',
   morestring=[b]"
 }
+\lstdefinelanguage{kubernetes-yaml}{
+  keywords={apiVersion, kind, metadata, spec},
+  keywordstyle=\color{blue}\bfseries,
+  keywords=[2]{image, name, selector, matchLabels, run, replicas, template, metadata, labels, containers, containerPort, protocol, Deployment},
+  keywordstyle=[2]\color{olive}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{\#},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
 \lstdefinestyle{C}{%
   language=C,                 % El lenguaje del código
   otherkeywords={__attribute__, __interrupt__, inline, asm, uint8_t, uint16_t,%
@@ -186,6 +199,14 @@
 }
 \lstdefinestyle{docker-compose}{%
   language=docker-compose-2,
+  showstringspaces=false,
+  commentstyle=\color{red},
+  keywordstyle=\color{blue},
+  inputencoding=utf8,
+  extendedchars=true
+}
+\lstdefinestyle{kubernetes}{%
+  language=kubernetes-yaml,
   showstringspaces=false,
   commentstyle=\color{red},
   keywordstyle=\color{blue},
