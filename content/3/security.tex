@@ -1,0 +1,16 @@
+A lo largo de todo el documento se ha visto cómo la tecnología de contenedores
+ha enfocado gran parte de su esfuerzo en la seguridad: desde el diseño inicial
+hasta la implementación final las características de seguridad de los 
+contenedores han supuesto un punto de inflexión en estas tecnologías.
+
+La cuestión es: ¿cuánto de seguros son? En común todas las tecnologías tienen
+un ``fallo'' de base: requieren de permisos de administrador para ejecutarse.
+Eso o bien el usuario que gestiona los contenedores pertenece a un grupo
+privilegiado, que sería equivalente a ejecutar ``todos'' los comandos como
+administrador.
+
+En esta sección se va a tratar por una parte la seguridad en Docker desde el 
+punto de vista de más bajo nivel, como es la comunicación con el kernel; hasta
+aspectos más ``elevados'' como son diferencias con otras soluciones como
+\texttt{chroot}, cómo afecta el \textit{firewall} a la seguridad de los
+contenedores y cómo de seguras son las comunicaciones entre contenedores.
