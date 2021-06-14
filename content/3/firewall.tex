@@ -1,0 +1,35 @@
+Internamente, Docker utiliza un \textit{firewall} para aislar las comunicaciones
+de red. En particular, el \textit{firewall} empleado es \texttt{iptables} \autocite{DockerIptables2021}.
+Esta herramienta está directamente embebida dentro del kernel de Linux, lo
+cual asegura una gran compatibilidad universal y un gran rendimiento, ya que
+trabaja directamente sobre el \textit{hardware} cuando es posible.
+
+Cuando se configura un contenedor o una red, el servicio de Docker inserta
+las reglas necesarias en las tablas de \texttt{iptables}. Esto se realiza
+sobre el sistema, por lo que es posible que exista conflicto con reglas que
+puedan existir ya.
+
+Sin embargo, esto abre nuevas opciones: configurar tus propias reglas para
+restringir el acceso a ciertos contenedores. Docker tiene su propio conjunto 
+de reglas (\texttt{DOCKER}) y luego tiene un grupo de reglas destinadas al
+usuario (\texttt{DOCKER-USER}). En este último un administrador puede definir
+qué reglas quiere aplicar a los contenedores.
+
+La versatilidad de esto permite, por una parte, definir que las conexiones
+al servicio de Docker solo se realicen desde una red interna:
+
+\begin{lstlisting}[style=bash, caption={Restricción de las conexiones a Docker según un rango de IPs \autocite{DockerIptables2021}.}]
+sudo iptables -I DOCKER-USER -m iprange -i <external-interface> ! --src-range 192.168.1.1-192.168.1.3 -j DROP
+\end{lstlisting}
+
+Si, por otra parte, Docker actúa como si fuese un router, se pueden permitir ciertas
+conexiones desde una interfaz hasta otra:
+
+\begin{lstlisting}[style=bash, caption={}]
+sudo iptables -I DOCKER-USER -i <source-interface> -o <destination-interface> -j ACCEPT
+\end{lstlisting}
+
+Una característica interesante es que se puede combinar con otros sistemas de
+\textit{firewall} como \texttt{firewalld} y, en un futuro, se plantea adoptar
+\texttt{nftables} como nuevo gestor de peticiones de red (es el sustituto de 
+\texttt{iptables} en las nuevas versiones de Linux).

@@ -1,0 +1,32 @@
+Desde las primeras versiones de Linux, el concepto de ``enjaular'' ya existía.
+Crear un \texttt{chroot} se traduce en que una aplicación se ejecuta sobre
+un directorio definido como si dicho directorio fuese la raíz. Por ejemplo,
+se crea un \texttt{chroot} en la ruta \texttt{/home/user/jail}. Cualquier
+proceso que se ejecute dentro de dicha ruta pensará que se está ejecutando
+sobre la raíz \texttt{/}, y no tendrá acceso al sistema de ficheros que haya
+por encima.
+
+Esta característica fue uno de los primeros pasos en la creación y configuración
+de \textit{sandboxes}, y además añadía cierta portabilidad porque siempre se
+podía comprimir dicho directorio, llevarlo a otro equipo y trabajar sobre
+sus contenidos directamente. Además, como en ese directorio el árbol UNIX
+no se respeta del todo, es posible aislar un proceso del resto
+excluyendo el directorio \texttt{/proc} o \texttt{/run} de la jaula.
+
+¿Qué diferencias existen con Docker? A lo largo de todo el documento, ya
+se tiene una idea muy clara de qué permite Docker. Principalmente, Docker presenta
+un mecanismo de aislamiento mucho más sofisticado. En una jaula es necesario
+renunciar a ciertos permisos o características para poder trabajar con
+seguridad. A veces es posible que no sea sencillo ejecutar un proceso o aplicación
+en una jaula y la configuración que se diseñe podría dañar directamente al sistema,
+ya que una jaula siempre se ejecuta como administrador. Por su parte, el aislamiento
+con Docker se consigue mediante los \textit{namespaces} de Linux.
+
+Por otra parte, en Docker los procesos tiene su propia tarjeta de red, su propio
+identificador (\textit{hostname}), memoria dedicada, limitación de recursos, \dots
+Es decir, es una solución mucho más sofisticada.
+
+Docker se compara más a una máquina virtual ya que permite usar un sistema
+distinto al que está instalado, mientras que en una jaula se comparte
+todo del sistema anfitrión. Por ende, la característica principal que diferencia una
+solución de otra es la capacidad de aislar procesos, recursos, memoria y red.
