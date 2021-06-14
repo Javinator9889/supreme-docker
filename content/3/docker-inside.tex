@@ -110,10 +110,143 @@ presenta la siguiente forma (figura \ref{fig:ns-mapping}):
   \item Desde el punto de vista de un \textit{namespace} de usuario el contenedor 
         se ejecuta con UID $0$ cuando en realidad está usando un rango de valores
         mapeados en dicho \textit{namespace}.
-  \item Los subsistemas Linux pueden ejecutar la función \lstinline[style=C]!ns_capable!
-        usando un \textit{namespace} específico de un recurso. De esta forma,
+  \item Los subsistemas Linux pueden ejecutar la función ``\lstinline[style=C]!ns_capable!''
+        (que permite definir si una tarea tiene en realidad mayores capacidades) usando un \textit{namespace} específico de un recurso. De esta forma,
         los procesos pueden realizar acciones ``privilegiadas'' sin tener en
         realidad privilegios sobre el sistema anfitrión.
 \end{itemize}
 
-\subsubsection*{Linux \textit{control groups}
+En la actualidad, el servicio Docker inicia los contenedores siempre con las
+capacidades mínimas posibles \autocite{DockerSecurity2021}: por ejemplo,
+servidores web que únicamente necesitan exponer un puerto protegido ($< 1024$)
+se le garantiza el permiso \texttt{net\_bind\_service} en lugar de ejecutarse
+como administrador.
+
+Esto permite que diversos procesos que siempre se ejecutan como administrador
+(SSH, cron, módulos del kernel, \dots) usen un usuario con menos privilegios
+y se les garantice únicamente acceso a las características que necesitan. Algunas
+operaciones además son directamente gestionadas por Docker en lugar de por
+las aplicaciones que se ejecutan:
+
+\begin{itemize}
+  \item El acceso mediante SSH se realiza mediante un único servidor gestionado por Docker.
+  \item Los procesos \texttt{cron} se ejecutan como usuario estándar, cuando es posible.
+  \item La gestión de \textit{logs} se delega a Docker u otro servicio.
+  \item La gestión del \textit{hardware} es irrelevante, lo que se traduce en que
+        instrucciones como \texttt{udevd} nunca serán necesarias.
+  \item La gestión de las redes sucede fuera de los contenedores, lo cual implica
+        que un contenedor nunca tendrá que ejecutar tareas con \texttt{ifconfig},
+        \texttt{route} o \texttt{ip}.
+\end{itemize}
+
+La implicación directa es que los contenedores no necesitan permisos de administrador
+reales (al menos, no todos) y se restringen las posibilidades del mismo. Por ende,
+se pueden aplicar algunas medidas de seguridad que impliquen denegar todas las 
+operaciones de montaje, impedir el acceso a sockets, prohibir ciertas operaciones
+sobre discos (particionado, cambiar permisos, etc.), denegar la carga de módulos
+del kernel y demás.
+
+Así, si un intruso es capaz de acceder a un contenedor y escalar privilegios hasta
+ser \texttt{root}, el daño que podrá hacer sobre el sistema estará limitado. Pero
+esto siempre ha de ir acompañado de una gestión competente: cuando se crea un
+contenedor, lo ideal sería quitar todas aquellas capacidades del contenedor que
+no sean necesarias o no se vayan a usar.
+
+\subsubsection*{Linux \textit{control groups}}
+Los grupos de control de Linux no son necesariamente una característica de seguridad
+sino de control y regulación de acceso a los recursos. En el estudio mencionado
+anteriormente (\autocite{sunSecurityNamespaceMaking2018}) uno de los problemas
+que se vieron en comparación con las máquinas virtuales era la restricción del
+acceso a los recursos y la limitación de ciertas acciones.
+
+Durante bastante tiempo los contenedores Docker no contaban con una limitación en
+la cantidad de recursos disponibles hasta que se adaptó el motor de ejecución
+para trabajar con los \textit{cgroups}, que existen en Linux desde el 2006
+(versión \texttt{2.6.24} \autocite{DockerSecurity2021}).
+
+Esta característica se incluye en el apartado de seguridad porque permite
+proteger a un contenedor de ataques de denegación de servicio, ``molestar'' a otro
+contenedor, etc.
+
+\subsubsection*{Ataque al servicio de Docker}
+La ejecución de contenedores implica el uso del servicio de Docker para ello. Si
+no se ha optado por el modo ``sin privilegios'', dicho servicio se ejecutará siempre
+como \texttt{root}, por lo que será uno de los elementos más atacados
+y vulnerables que existan.
+
+En general, sobre el servicio Docker no se pueden tomar muchas acciones en lo
+referente a privilegios o código fuente pero sí se pueden aplicar ciertas restricciones
+sobre el uso. Lo primero es restringir qué usuarios pueden interactuar con el
+servicio de Docker, ya que es una implicación directa de seguridad. En Docker,
+se puede hacer \textit{bind mounts} del directorio raíz del sistema (\texttt{/})
+dentro de un directorio \texttt{/host} en el contenedor. Desde allí, se puede
+acceder a cualquier fichero, directorio o dispositivo sin restricciones ni
+limitaciones.
+
+Es por este motivo por el que Docker CLI utiliza una API REST contra un socket
+UNIX en lugar de usar la dirección \texttt{127.0.0.1}, ya que permite ajustar
+los permisos del socket usando el sistema de permisos de Linux. Bajo esta
+premisa, si se decidiese crear un contenedor que expusiera una API REST bajo
+HTTP habría que dedicar especial atención a qué ficheros se puede acceder y
+controlar todavía más los parámetros que se reciben. Inclusive aunque se restrinja
+el acceso a la API únicamente a la red local mediante el uso de \textit{firewalls},
+otros contenedores podrían comprometer el sistema. Por ello, es obligatorio
+proteger los \textit{endpoints} usando HTTPS y certificados digitales, y altamente
+recomendable que solo sea accesible a través de una VPN.
+
+Por otra parte, el servicio Docker es potencialmente vulnerable a otras entradas como
+la carga de una imagen desde el disco con \lstinline[style=bash]!docker load!
+o desde la red con \lstinline[style=bash]!docker pull!. Por ello, el primer paso
+desde la versión \texttt{1.10.0} de Docker es la de crear una jaula \texttt{chroot}
+en donde desempaquetar la imagen y preparar el entorno. Para evitar estos problemas
+se puede configurar el servidor Docker para que únicamente trabaje con imágenes
+firmadas -- DCT (\textit{Docker Content Trust}).
+
+Esta característica es nativa al servicio de Docker y se puede usar
+directamente desde Docker CLI. Mediante esta herramienta, un usuario que
+publique una imagen podrá firmarla y darle la seguridad a los clientes
+de que se está usando una imagen oficial. Las claves de firma se disgregan
+en tres tipos de claves:
+
+\begin{itemize}
+  \item Claves offline, para la firma inicial de la imagen asociada a un usuario.
+  \item Clave de etiquetado (\textit{tag key}), asociada a un repositorio de imágenes.
+  \item Clave de tiempo (\textit{timestamp key}), asociada a un repositorio y creada
+        por Docker.
+\end{itemize}
+
+Todas las claves se generan a raíz de la clave offline, también conocida como
+``\textit{root key}'' (figura \ref{fig:keys}):
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{pictures/trust_components.png}
+  \caption{Distribución de las claves para la firma de imágenes en Docker \autocite{ContentTrustDocker2021}.}
+  \label{fig:keys}
+\end{figure}
+
+\subsubsection*{Mayor protección de Docker}
+Una de las características fundamentales de que se ejecute sobre el kernel de Linux
+es que Docker está directamente integrado con otras herramientas de seguridad.
+
+Aunque el motor Docker deshabilite ciertas posibilidades sobre los contenedores
+esto no implica que otros sistemas no se puedan usar en conjunto. Por ejemplo:
+
+\begin{itemize}
+  \item Se puede ejecutar un kernel con GRSEC \autocite{Grsecurity} y PAX \autocite{PaX2019}
+        para añadir opciones de seguridad tanto en la compilación como en tiempo
+        de ejecución. Por otra parte, mediante el uso de técnicas de seguridad como
+        la aleatorización de direcciones se mitigan muchas vulnerabilidades
+        del sistema. Lo interesante es que no es necesaria ninguna interacción
+        por parte de Docker ya que son características que se aplican a lo largo
+        de todo el sistema.
+  \item Si la aplicación viene con un modelo de seguridad que use AppArmor o SELinux
+        se puede integrar directamente dentro de Docker, sin necesidad de hacer
+        ningún cambio. Esto otorgará una capa extra de seguridad que se complementa
+        con la restricción de las capacidades del contenedor.
+\end{itemize}
+
+En principio, cualquier herramienta externa se podría usar dentro de un contenedor
+Docker para proteger el acceso y añadir más capas de seguridad. Esto se hace
+principalmente sobre sistemas de ficheros en red o compartidos con otros
+contenedores, donde la seguridad es crítica.
