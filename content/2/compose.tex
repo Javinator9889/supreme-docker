@@ -1,0 +1,325 @@
+Uno de los principales puntos que se han visto durante el desarrollo del documento
+es la necesidad de comunicar contenedores y de distribuir aplicaciones en var­ias
+imágenes Docker.
+
+Un \textit{stack} típico de aplicaciones sería un servidor XAMPP: un contenedor
+ejecutando Apache que se comunica con una base de datos MySQL y que utiliza
+un \textit{backend} basado en PHP. Se puede construir una única imagen la cual
+se componga de esas tres aplicaciones y sus dependencias. Sin embargo, según
+se recomienda desde Docker, lo ideal para no añadir demasiada complejidad sería
+crear un contenedor mínimo para cada aplicación que funcione de forma aislada del
+resto pero que se comunique con ello.
+
+Si bien esta tarea se podría realizar manualmente con los comandos que se
+han visto anteriormente, existe una herramienta llamada ``\texttt{docker-compose}''
+la cual gestiona clústers de contenedores que se ejecutan a la vez y que dependen
+unos de otros.
+
+\subsubsection*{¿Qué es Docker Compose?}
+Docker Compose es una herramienta basada en Python que se usa para definir
+aplicaciones multicontenedor dentro de Docker. Se basa en el formato de ficheros
+YAML para definir los servicios de la aplicación y, con un único comando, 
+preparar su ejecución y trabajar con dichos servicios \cite{OverviewDockerCompose2021}.
+
+La definición de un servicio de Compose se define en tres pasos:
+
+\begin{enumerate}
+    \item Definir los ficheros \texttt{Dockerfile} de cada uno de los entornos de
+          la aplicación.
+    \item Definir qué servicios componen la aplicación en un fichero \texttt{docker-compose.yml}.
+    \item Ejecutar el comando ``\lstinline[style=bash]!docker compose up!'' para lanzar
+          la aplicación al completo.
+\end{enumerate}
+
+Un fichero \texttt{docker-compose.yml} tiene una forma como esta (código \ref{lst:compose}):
+
+\begin{lstlisting}[style=docker-compose, caption={Estructura típica de un fichero de Docker Compose \cite{OverviewDockerCompose2021}.}, label={lst:compose}]
+version: "3.9"  # optional since v1.27.0
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/code
+      - logvolume01:/var/log
+    links:
+      - redis
+  redis:
+    image: redis
+volumes:
+  logvolume01: {}
+\end{lstlisting}
+
+La estructura que se sigue habitualmente se define por las siguientes claves
+en el fichero YAML \cite{DockerComposeTutorial}:
+
+\begin{itemize}
+  \item \texttt{version: "XY"} define qué versión de Docker Compose se está 
+        usando. Esta línea, aunque opcional desde la versión \texttt{v1.27.0},
+        es fundamental ya que las características de Docker Compose varían según
+        la versión que se esté usando. Es importante que en este caso una versión
+        posterior no implica que ``sea mejor'' sino que algunas características
+        cambian de nombre, otras aparecen y otras se eliminan.
+  \item \texttt{services} -- esta sección define los distintos contenedores que
+        se van a crear. En el ejemplo del código \ref{lst:compose}, se crean dos
+        servicios: uno primero que es \texttt{web} que se construye sobre el
+        directorio actual; y un segundo con nombre \texttt{redis} que usa la
+        imagen de Redis desde Docker Hub.
+  \item \texttt{build} especifica la ubicación del fichero \texttt{Dockerfile}. En
+        en ejemplo del código \ref{lst:compose} se usa el directorio actual `\texttt{.}'
+        como ubicación para construir el contenedor.
+  \item \texttt{ports} especifica los puertos mapeados del contenedor en cuestión.
+        Es el equivalente a la opción \lstinline[style=bash]!-p! del comando
+        \texttt{docker}.
+  \item \texttt{volumes} define los volúmenes que se van a usar en el contenedor.
+        En particular es como usar la opción \lstinline[style=bash]!-v! a la hora
+        de crear un contenedor. Por ende, se puede usar un directorio para hacer
+        \textit{bind mounts}, usar el nombre de un volúmen, etc.
+  \item \texttt{links} permite unir un contenedor a otro. En este caso, se especifica
+        a qué contenedor se puede acceder.
+  \item \texttt{image} permite definir un servicio en un \texttt{docker-compose}
+        usando una imagen ya existente en Docker Hub, si no se dispone del
+        \texttt{Dockerfile} apropiado.
+  \item \texttt{environment} define las variables del entorno del contenedor
+        y sus respectivos valores. Equivalente a la opción \lstinline[style=bash]!-e!
+        del comando \texttt{docker}.
+\end{itemize}
+
+Así, con la estructura del fichero ya definida, usando el comando \texttt{docker-compose}
+se puede \cite{OverviewDockerCompose2021}:
+\begin{itemize}
+    \item Iniciar, parar y reconstruir servicios.
+    \item Ver el estado de los servicios en ejecución.
+    \item Volcar los registros de ejecución en tiempo real (\textit{stream view}).
+    \item Ejecutar un único comando en un servicio.
+\end{itemize}
+
+Tras esta idea se ha construido una forma muy potente y simple de crear aplicaciones
+multicontenedor. Aprovechando las características de Docker, Compose permite 
+ejecutar distintos entornos aislados en el mismo anfitrión. Por ejemplo, de esta
+forma, una aplicación Docker Compose puede contar con varios entornos según
+en donde se quiera ejecutar. Por ejemplo, se puede tener un entorno de desarrollo,
+otro de CI y uno de producción en el mismo \textit{host}. Esto se consigue gracias
+a los nombres de proyecto, característica fundamental de Docker Compose para
+distinguir y aislar entornos.
+
+Otro punto interesante es que se puede actualizar el fichero ``\texttt{docker-compose.yml}''
+cuando se necesite y la construcción de los contenedores se realizará únicamente
+para aquellos que hayan cambiado. Esto da una gran agilidad a la hora de 
+presentar actualizaciones en un entorno de producción y potencia la idea de
+microservicios, en donde solo se actualiza lo que se necesita.
+
+Esto afecta también a cómo se gestionan los datos de los contenedores. Si el 
+volumen asociado a un contenedor ya existía se sigue usando el mismo, en ningún
+momento se ``tira abajo'' y se empieza desde cero.
+
+Finalmente, una de las características más interesantes de Docker Compose es que
+soporta las variables del entorno. Esto se traduce en que un mismo fichero
+YAML de Docker Compose puede producir distintas configuraciones según el
+entorno en que se encuentre. Aprovechando esta característica, se pueden definir
+y usar ficheros \texttt{.env} para establecer las variables del entorno que
+se usarán a la hora de desplegar los servicios y trabajar con los contenedores.
+
+\subsubsection*{Comandos Docker Compose}
+De entre todas las opciones que ofrece Compose, algunas son muy interesantes por
+las potencias que ofrecen y sus utilidades \cite{DockerComposeTutorial}:
+
+\begin{itemize}
+  \item \lstinline[style=bash]!docker-compose build! prepara las imágenes 
+        construyendo los servicios, listos para ser lanzados. Si una imagen
+        es del repositorio \textit{online} no se hace nada.
+  \item \lstinline[style=bash]!docker-compose images! lista las imágenes que
+        se han construido desde el fichero actual.
+  \item \lstinline[style=bash]!docker-compose stop! detiene los servicios en
+        ejecución actuales.
+  \item \lstinline[style=bash]!docker-compose run <service>! crea los contenedores
+        para el servicio especificado.
+  \item \lstinline[style=bash]!docker-compose up! inicia todo el proceso de despliegue
+        de los servicios: primero, construye las imágenes necesarias y luego
+        inicia cada uno de los contenedores especificados.
+  \item \lstinline[style=bash]!docker-compose ps! lista todos los contenedores del
+        \texttt{docker-compose.yml} actual.
+  \item \lstinline[style=bash]!docker-compose down! detiene todos los contenedores
+        y limpia sus datos, redes e imágenes.
+\end{itemize}
+
+\subsubsection*{Caso real}
+A modo de demostración, se va a crear un \textit{stack} Wordpress, NGINX, PHP-FPM
+y MySQL para desplegar un servidor web Wordpress de forma sencilla (basándose en
+el ejemplo de Digital Ocean \cite{ComoInstalarWordPress}).
+
+Asumiendo que los ficheros de configuración de NGINX ya están preparados así
+como las dependencias necesarias, se pasa a definir los ficheros de Docker
+Compose. Por una parte, para la base de datos, se van a definir las
+credenciales en un fichero \texttt{.env}:
+
+\begin{lstlisting}[style=bash, caption={}]
+MYSQL_ROOT_PASSWORD="password-random"
+MYSQL_USER="wordpress_user"
+MYSQL_PASSWORD="wordpress-random-password"
+\end{lstlisting}
+
+A continuación, se pasa a definir cada uno de los servicios que compondrá la
+aplicación. El primero de ellos será la base de datos MySQL (código \ref{lst:compose-mysql}):
+
+\begin{lstlisting}[style=docker-compose, caption={Servicio de MySQL para el \textit{stack} Wordpress.}, label={lst:compose-mysql}]
+version: '3'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: db
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - MYSQL_DATABASE=wordpress
+    volumes:
+      - dbdata:/var/lib/mysql
+    command: '--default-authentication-plugin=mysql_native_password'
+    networks:
+      - app-network
+\end{lstlisting}
+
+Lo primero que se especifica es la versión de Docker Compose que se necesita, en
+este caso, la $3$. Para este caso en particular, se va a usar la imagen de
+MySQL versión 8.0 (clave \texttt{image}) con nombre ``\texttt{db}'' y que se
+debe reiniciar hasta que se detenga (clave \texttt{restart}). En lo referente
+a las variables del entorno, se define el nombre de la base de datos asignando
+la clave \texttt{MYSQL\_DATABASE} y se define un volumen ``\texttt{dbdata}'' el
+cual almacenará los datos de MySQL de forma persistente. Finalmente, se especifican
+algunas opciones iniciales al comando inicial de MySQL y se especifica la red
+en la que estará conectada.
+
+A continuación, se define el servicio de Wordpress (código \ref{lst:compose-wordpress}):
+
+\begin{lstlisting}[style=docker-compose, caption={Servicio de Wordpress.}, label={lst:compose-wordpress}]
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:5.1.1-fpm-alpine
+    container_name: wordpress
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - WORDPRESS_DB_HOST=db:3306
+      - WORDPRESS_DB_USER=$MYSQL_USER
+      - WORDPRESS_DB_PASSWORD=$MYSQL_PASSWORD
+      - WORDPRESS_DB_NAME=wordpress
+    volumes:
+      - wordpress:/var/www/html
+    networks:
+      - app-network
+\end{lstlisting}
+
+En este caso, la configuración es similar al de MySQL pero se añade una directiva
+que define el orden de inicio de los contenedores (\texttt{depends\_on}). Se va a
+usar la imagen de \texttt{wordpress:5.1.1-fpm-alpine} que es la versión de Wordpress
+\texttt{5.1.1} con PHP-FPM por detrás en la versión \textit{alpine}, derivada del
+proyecto Alpine Linux que busca un tamaño reducido de las imágenes. A continuación,
+se especifica el fichero que contiene las variables del entorno (\texttt{env\_file})
+y se definen las opciones de Wordpress. Finalmente, se crea un volúmen que contendrá
+los datos de Wordpress y se asocia al directorio \texttt{/var/www/html} dentro
+del contenedor y se define la red a la que se conecta.
+
+Por último, pero no menos importante, se define el servidor web en sí. En este caso,
+se usa NGINX (código \ref{lst:compose-nginx}):
+
+\begin{lstlisting}[style=docker-compose, caption={Servicio de NGINX.}, label={lst:compose-nginx}]
+  webserver:
+    depends_on:
+      - wordpress
+    image: nginx:1.15.12-alpine
+    container_name: webserver
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - wordpress:/var/www/html
+      - ./nginx-conf:/etc/nginx/conf.d
+    networks:
+      - app-network
+\end{lstlisting}
+
+De la configuración anterior es importante fijarse en que, por una parte, se
+expone el puerto \texttt{80} (HTTP) al exterior (opción \texttt{ports}) y se
+reutiliza el volúmen de Wordpress. Además, se hace un \textit{bind mounts} del
+fichero ``\texttt{nginx-conf}'' dentro del directorio \texttt{/etc/nginx/conf.d}.
+Esto permite realizar cambios en la configuración de NGINX y que se puedan aplicar
+directamente.
+
+Finalmente, al final del fichero, se añade la especificación de la red y de
+los volúmenes (código \ref{lst:compose-end}):
+
+\begin{lstlisting}[style=docker-compose, caption={Especificación de los volúmenes y de las redes.}, label={lst:compose-end}]
+volumes:
+  wordpress:
+  dbdata:
+
+networks:
+  app-network:
+    driver: bridge
+\end{lstlisting}
+
+Quedando un fichero \texttt{docker-compose.yml} así:
+
+\begin{lstlisting}[style=docker-compose, caption={}]
+version: '3'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: db
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - MYSQL_DATABASE=wordpress
+    volumes:
+      - dbdata:/var/lib/mysql
+    command: '--default-authentication-plugin=mysql_native_password'
+    networks:
+      - app-network
+
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:5.1.1-fpm-alpine
+    container_name: wordpress
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - WORDPRESS_DB_HOST=db:3306
+      - WORDPRESS_DB_USER=$MYSQL_USER
+      - WORDPRESS_DB_PASSWORD=$MYSQL_PASSWORD
+      - WORDPRESS_DB_NAME=wordpress
+    volumes:
+      - wordpress:/var/www/html
+    networks:
+      - app-network
+
+  webserver:
+    depends_on:
+      - wordpress
+    image: nginx:1.15.12-alpine
+    container_name: webserver
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - wordpress:/var/www/html
+      - ./nginx-conf:/etc/nginx/conf.d
+    networks:
+      - app-network
+
+volumes:
+  wordpress:
+  dbdata:
+
+networks:
+  app-network:
+    driver: bridge
+\end{lstlisting}
+
+Después de realizar varias configuraciones iniciales, el servidor Wordpress ya
+estará completamente funcional y disponible (ver el ejemplo completo en la
+web de Digital Ocean \cite{ComoInstalarWordPress}).

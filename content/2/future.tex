@@ -1,0 +1,27 @@
+Docker es una tecnología muy en boga hoy en día. Sin embargo, varios problemas
+durante el desarrollo y la falta de actualizaciones con características
+demandadas han llevado al ``rey'' a caerse.
+
+Parece que en los últimos meses (a junio de 2021) se han puesto las pilas y han
+retomado con fuerza el desarrollo de su motor de ejecución y herramienta de
+orquestación. Uno de los problemas que se encuentran muchas empresas a la hora
+de desplegar contenedores es su naturaleza efímera y no persistente que, si bien
+es cierto es su gran ventaja, muchas veces puede jugar en su contra.
+
+Sería necesario un modelo de contenedor sostenible en el tiempo, que se mantenga
+por sí mismo y que no requiera de atención por parte del gestor. Parece ser que
+cada vez la tendencia tiene más hacia allí y Docker está enfocando sus esfuerzos
+en escuchar a la comunidad y mantenerse como líder.
+
+Otro factor crítico fue la noticia de \textit{deprecation} de Docker dentro de
+Kubernetes \autocite{DonPanicKubernetes2020}: en favor del estándar de contenedores
+\texttt{containerd} las imágenes nativas de Kubernetes se sustituyen por aquellas
+basadas en CRI (\textit{Container Runtime Interface}). Si bien esto no deja de lado
+a Docker ya que se sigue pudiendo ejecutar en Kubernetes, es un golpe duro ya que
+las empresas están centrando sus esfuerzos en otras tecnologías de contenedores.
+
+Es por ello por lo que Docker está apostando en su tecnología de orquestación, 
+Swarm, para intentar imponerse como nuevo líder en gestión de contenedores. Es
+una tarea compleja (principalmente porque Kubernetes es el líder) pero tiene
+muchos factores a su favor, como la fácil integración y la sencillez en las
+operaciones.

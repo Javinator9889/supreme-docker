@@ -1,0 +1,31 @@
+Los contenedores, en apariencia, son muy seguros. Si se toman las medidas 
+pertinentes y se ejecutan los procesos como un usuario sin privilegios, es
+muy complejo que pueda haber un fallo de seguridad usando esta tecnología.
+
+Si además se combina lo anterior con una capa extra de seguridad como puede
+ser AppArmor, SELinux, GRSEC y reglas de \textit{firewall} que gestionen las
+comunicaciones, se tiene una solución estanca en donde desplegar
+cómodamente las aplicaciones, de una forma fácil, sencilla y funcional.
+
+En diversos estudios se ha visto cómo Docker ofrece una capa de seguridad
+muy densa tanto por encima de las aplicaciones como por debajo, a nivel de
+kernel. Sin embargo, se han detectado varios fallos de seguridad en lo
+referente a las interfaces que pueden ser aprovechados para hacer ARP
+\textit{spoofing} y MAC \textit{flooding}. Esto se debe a que principalmente
+no añade ningún tipo de filtro al tráfico de red que circula por la interfaz
+\autocite{buiAnalysisDockerSecurity2015}. Sin embargo, esto se puede subsanar
+añadiendo reglas de \textit{firewall} que regulen y filtren los paquetes que
+circulan por la interfaz.
+
+Otro problema podría surgir de ejecutar los contenedores en modo privilegiado,
+lo cual implica que es casi como si se estuviera ejecutando en la máquina
+anfitriona con privilegios \texttt{root}. Aunque hay que tener en cuenta que
+esta característica casi nunca se usa debido a sus implicaciones de seguridad
+y a que la gran mayoría de contenedores no requieren de esta opción para
+funcionar.
+
+Se ve que efectivamente el aislamiento que ofrece Docker es muy eficaz y, 
+combinado con unas buenas prácticas, explica la gran evolución y crecimiento
+de este tipo de tecnologías durante los últimos años. Eso combinado con la
+gran velocidad en el desarrollo y en la ejecución que presenta lo ha convertido
+en la ``opción ganadora'' que se ha mantenido al alza durante los últimos 4 años.

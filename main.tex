@@ -1,0 +1,335 @@
+% !TeX program = XeLaTeX or LuaLaTeX
+% !TeX encoding = UTF-8 Unicode
+\documentclass[a4paper,oneside,12pt]{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[spanish]{babel}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{fontspec}
+\usepackage[xetex]{graphicx}
+\usepackage{csquotes}
+\usepackage{a4wide} %%Smaller margins, more text per page.
+\usepackage{longtable} %%For tables that exceed a page width
+\usepackage{caption} %%Pro­vides many ways to cus­tomise the cap­tions in float­ing en­vi­ron­ments like fig­ure and ta­ble
+\usepackage{float} %%Im­proves the in­ter­face for defin­ing float­ing ob­jects such as fig­ures and ta­bles
+\usepackage[tablegrid,nochapter]{vhistory} %%Vhis­tory sim­pli­fies the cre­ation of a his­tory of ver­sions of a doc­u­ment
+\usepackage[nottoc]{tocbibind} %%Au­to­mat­i­cally adds the bib­li­og­ra­phy and/or the in­dex and/or the con­tents, etc., to the Ta­ble of Con­tents list­ing
+\usepackage[toc,page]{appendix} %%The ap­pendix pack­age pro­vides var­i­ous ways of for­mat­ting the ti­tles of ap­pen­dices
+\usepackage{pdfpages} %%This pack­age sim­pli­fies the in­clu­sion of ex­ter­nal multi-page PDF doc­u­ments in LATEX doc­u­ments
+\usepackage[rightcaption]{sidecap} %%De­fines en­vi­ron­ments called SC­fig­ure and SCtable (anal­o­gous to fig­ure and ta­ble) to type­set cap­tions side­ways
+% \usepackage{cite} %%The pack­age sup­ports com­pressed, sorted lists of nu­mer­i­cal ci­ta­tions, and also deals with var­i­ous punc­tu­a­tion and other is­sues of rep­re­sen­ta­tion, in­clud­ing com­pre­hen­sive man­age­ment of break points
+\usepackage[printonlyused]{acronym} %%This pack­age en­sures that all acronyms used in the text are spelled out in full at least once. It also pro­vides an en­vi­ron­ment to build a list of acronyms used
+% \usepackage[pdftex,scale={.8,.8}]{geometry} %%The pack­age pro­vides an easy and flex­i­ble user in­ter­face to cus­tomize page lay­out, im­ple­ment­ing auto-cen­ter­ing and auto-bal­anc­ing mech­a­nisms so that the users have only to give the least de­scrip­tion for the page lay­out. For ex­am­ple, if you want to set each mar­gin 2cm with­out header space, what you need is just \usep­a­ck­age[mar­gin=2cm,no­head]{ge­om­e­try}.
+\usepackage{layout} %%The pack­age de­fines a com­mand \lay­out, which will show a sum­mary of the lay­out of the cur­rent doc­u­ment
+\usepackage{subfigure} %%Pro­vides sup­port for the ma­nip­u­la­tion and ref­er­ence of small or ‘sub’ fig­ures and ta­bles within a sin­gle fig­ure or ta­ble en­vi­ron­ment.
+\usepackage[toc]{glossaries} %%The glos­saries pack­age sup­ports acronyms and mul­ti­ple glos­saries, and has pro­vi­sion for op­er­a­tion in sev­eral lan­guages (us­ing the fa­cil­i­ties of ei­ther ba­bel or poly­glos­sia).
+\usepackage[left,pagewise,modulo]{lineno} %%Adds line num­bers to se­lected para­graphs with ref­er­ence pos­si­ble through the LATEX \ref and \pageref cross ref­er­ence mech­a­nism
+\usepackage[xetex,colorlinks=false,hidelinks,pdfstartview=FitV,bookmarks=true]{hyperref}%%The hy­per­ref pack­age is used to han­dle cross-ref­er­enc­ing com­mands in LATEX to pro­duce hy­per­text links in the doc­u­ment. 
+\usepackage{metainfo}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
+% \usepackage[a4paper,left=2.5cm,right=2.5cm,top=\dimexpr15mm+1.5\baselineskip,bottom=2cm]{geometry}
+\usepackage{geometry}
+% \usepackage[pagestyles,raggedright]{titlesec}
+\usepackage{etoolbox}
+\usepackage{tabularx}
+\usepackage{ltxtable}
+\usepackage[style=ieee]{biblatex}
+\bibliography{base/Docker.bib}
+\usepackage[nottoc]{tocbibind}
+\usepackage[official]{eurosym}
+\usepackage{gensymb}
+\usepackage{qrcode}
+\usepackage{numprint}
+\usepackage{mathtools}
+\usepackage[nice]{nicefrac}
+\usepackage{tikz}
+\usetikzlibrary{arrows,automata,babel,positioning,calc}
+\usepackage{%
+    array, %%An ex­tended im­ple­men­ta­tion of the ar­ray and tab­u­lar en­vi­ron­ments which ex­tends the op­tions for col­umn for­mats, and pro­vides "pro­grammable" for­mat spec­i­fi­ca­tions
+    booktabs, %%The pack­age en­hances the qual­ity of ta­bles in LATEX, pro­vid­ing ex­tra com­mands as well as be­hind-the-scenes op­ti­mi­sa­tion
+    dcolumn, %%
+    rotating,
+    shortvrb,
+    units,
+    url,
+    longtable,
+    lscape,
+    qtree,
+    skmath,	
+    enumitem,
+    wasysym,
+    mathcomp,
+    titling,
+    libertine,
+    fancyhdr,
+    microtype
+}
+
+% Necessary packages for the titlepage:
+\usepackage{comment}
+
+\newcommand{\bigO}[1]{%
+  \text{\usefont{OMS}{cmsy}{m}{n}O}\left(#1\right)%
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Java --> latex 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setmonofont{Fira Code}[
+  Contextuals=Alternate,
+  Ligatures = {Common,Rare}
+]
+\usepackage{letltxmacro}
+\LetLtxMacro\oldttfamily\ttfamily
+\DeclareRobustCommand{\ttfamily}{\oldttfamily\csname ttsize\endcsname}
+\newcommand{\settttsize}[1]{\def\ttsize{#1}}%
+\usepackage{lstfiracode}
+\usepackage{listings}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % Indica el color de fondo; necesita que se añada \usepackage{color} o \usepackage{xcolor}
+  basicstyle=\footnotesize\ttfamily,        % Fija el tamaño del tipo de letra utilizado para el código
+  breakatwhitespace=false,         % Activarlo para que los saltos automáticos solo se apliquen en los espacios en blanco
+  inputencoding=utf8,
+  breaklines=true,                 % Activa el salto de línea automático
+  captionpos=b,                    % Establece la posición de la leyenda del cuadro de código
+  commentstyle=\color{darkgreen},    % Estilo de los comentarios
+  extendedchars=true,              % Permite utilizar caracteres extendidos no-ASCII; solo funciona para codificaciones de 8-bits; para UTF-8 no funciona. En xelatex necesita estar a true para que funcione.
+  frame=single,	                   % Añade un marco al código
+  keepspaces=true,                 % Mantiene los espacios en el texto. Es útil para mantener la indentación del código(puede necesitar columns=flexible).
+  columns=flexible,
+  keywordstyle=\color{darkorange},       % estilo de las palabras clave
+  numbers=left,                    % Posición de los números de línea (none, left, right).
+  numbersep=5pt,                   % Distancia de los números de línea al código
+  numberstyle=\small\color{gray}, % Estilo para los números de línea
+  rulecolor=\color{black},         % Si no se activa, el color del marco puede cambiar en los saltos de línea entre textos que sea de otro color, por ejemplo, los comentarios, que están en verde en este ejemplo
+  showspaces=false,                % Si se activa, muestra los espacios con guiones bajos; sustituye a 'showstringspaces'
+  showstringspaces=false,          % subraya solamente los espacios que estén en una cadena de esto
+  showtabs=false,                  % muestra las tabulaciones que existan en cadenas de texto con guión bajo
+  stringstyle=\color{darkgreen},     % Estilo de las cadenas de texto
+  style=FiraCodeStyle,
+  identifierstyle=\color{blue},
+  tabsize=4,	                   % Establece el salto de las tabulaciones a 2 espacios
+  title=\lstname,                   % muestra el nombre de los ficheros incluidos al utilizar
+  caption=\lstname,
+  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'{\i}}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1 {ü}{{\"u}}1 {Ü}{{\"U}}1 {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {¿}{{?``}}1 {¡}{{!``}}1 {º}{\textdegree}1,
+  postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+}
+\lstdefinelanguage{docker}{
+  keywords={FROM, RUN, COPY, ADD, ENTRYPOINT, CMD,  ENV, ARG, WORKDIR, EXPOSE, LABEL, USER, VOLUME, STOPSIGNAL, ONBUILD, MAINTAINER},
+  keywordstyle=\color{blue}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{\#},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstdefinelanguage{docker-compose}{
+  keywords={image, environment, ports, container_name, ports, volumes, links},
+  keywordstyle=\color{blue}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{\#},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+\lstdefinelanguage{docker-compose-2}{
+  keywords={version, volumes, services, networks, driver},
+  keywordstyle=\color{blue}\bfseries,
+  keywords=[2]{image, environment, ports, container_name, ports, links, build, depends_on, restart, env_file, command, bridge, "unless-stopped", never, always, configs, secrets, file, source, target, deploy, mode, replicas},
+  keywordstyle=[2]\color{olive}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{\#},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+\lstdefinelanguage{kubernetes-yaml}{
+  keywords={apiVersion, kind, metadata, spec},
+  keywordstyle=\color{blue}\bfseries,
+  keywords=[2]{image, name, selector, matchLabels, run, replicas, template, metadata, labels, containers, containerPort, protocol, Deployment},
+  keywordstyle=[2]\color{olive}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{\#},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+\lstdefinestyle{C}{%
+  language=C,                 % El lenguaje del código
+  otherkeywords={__attribute__, __interrupt__, inline, asm, uint8_t, uint16_t,%
+  uint32_t, uint64_t, time_t, size_t, servo_t, motor_t, Nop,%
+  point_t, angle_t, double64_t, int_fast64_t, bool, true, false, stdbool, stdint,%
+  stdlib, stddef, NULL}           % Si se quieren añadir otras palabras clave al lenguaje
+}
+\lstdefinestyle{Python}{%
+  language=Python
+}
+
+\lstdefinestyle{Ada}{%
+  language=Ada
+}
+\lstdefinestyle{bash}{%
+  language=bash,
+  otherkeywords={sudo,chmod,chown,chgrp,ls,mkdir,touch,useradd,groupadd,usermod}
+}
+\lstdefinestyle{R}{%
+  language=R,
+  otherkeywords={0,1,2,3,4,5,6,7,8,9},
+  morekeywords={TRUE,FALSE},
+  deletekeywords={data,frame,length,as,character,time,ts}
+}
+\lstdefinestyle{Dockerfile}{%
+  language=Docker,
+  showstringspaces=false,
+  commentstyle=\color{red},
+  keywordstyle=\color{blue},
+  inputencoding=utf8,
+  extendedchars=true
+}
+\lstdefinestyle{docker-compose}{%
+  language=docker-compose-2,
+  showstringspaces=false,
+  commentstyle=\color{red},
+  keywordstyle=\color{blue},
+  inputencoding=utf8,
+  extendedchars=true
+}
+\lstdefinestyle{kubernetes}{%
+  language=kubernetes-yaml,
+  showstringspaces=false,
+  commentstyle=\color{red},
+  keywordstyle=\color{blue},
+  inputencoding=utf8,
+  extendedchars=true
+}
+\usepackage{xcolor}
+\definecolor{pblue}{rgb}{0.13,0.13,1}
+\definecolor{pgreen}{rgb}{0,0.5,0}
+\definecolor{pred}{rgb}{0.9,0,0}
+\definecolor{pgrey}{rgb}{0.46,0.45,0.48}
+\definecolor{darkgreen}{rgb}{0.0, 0.4, 0.0}
+\definecolor{darkorange}{rgb}{1.0, 0.55, 0.0}
+% \usepackage{inconsolata}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \setlength{\parindent}{0pt}
+\setlength{\parskip}{.5\baselineskip}
+%% Checkmark symbols
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\newcommand{\done}{\rlap{$\square$}{\raisebox{2pt}{\large\hspace{1pt}\cmark}}%
+\hspace{-2.5pt}}
+\newcommand{\wontfix}{\rlap{$\square$}{\large\hspace{1pt}\xmark}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Creation of the header
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\patchcmd{\chapter}{plain}{short}{}{} %$ <-- the header on chapter 1
+\addto\captionsspanish{%
+  \renewcommand\appendixname{Anexo}
+  \renewcommand\appendixpagename{Anexos}
+}
+\newcolumntype{s}{>{\hsize=.5\hsize\linewidth=\hsize}X}
+\newcolumntype{b}{>{\hsize=.75\hsize}X}
+\newcommand{\heading}[1]{\multicolumn{1}{c}{#1}}
+\newcolumntype{L}[1]{>{\hsize=#1\hsize\raggedright\arraybackslash}X}%
+\newcolumntype{R}[1]{>{\hsize=#1\hsize\raggedleft\arraybackslash}X}%
+\newcolumntype{C}[1]{>{\hsize=#1\hsize\centering\arraybackslash}X}%
+
+\DeclareMathOperator{\atantwo}{atan2}
+
+\DeclareMathOperator{\arctantwo}{arctan2}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% DOCUMENT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\author{Javier Alonso Silva}
+\title{Análisis de contenedores Docker}
+\date{2021}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhfoffset[L]{1cm} % left extra length
+\fancyhfoffset[R]{1cm} % right extra length
+\rhead{2021}
+\chead{\thetitle}
+\lhead{\slshape\nouppercase{\leftmark}}
+\cfoot{\thepage}
+\pagenumbering{roman}
+
+\begin{document}
+
+\settttsize{\footnotesize}
+\ActivateVerbatimLigatures
+\include{base/titlepage}
+
+\newpage
+\begin{abstract}
+  Docker se ha convertido en el nuevo estándar de despliegue de aplicaciones
+  y en la nueva herramienta compañera del desarrollador. En este documento se
+  va a estudiar cómo funciona Docker, cómo está compuesto, qué mecanismos usa
+  para trabajar de forma eficiente y los conceptos relacionados al mismo:
+  contenedores, imágenes, interfaces virtuales, volúmenes y gestores de
+  almacenamiento.
+
+  Por otra parte, el gran crecimiento conlleva unas responsabilidades de
+  seguridad que no siempre se pueden abarcar. Se verá cómo Docker hace uso de
+  mecanismos de seguridad del kernel de Linux para aislar los procesos con
+  \textit{namespaces}, crear interfaces de red virtuales con \texttt{iptables}
+  y restringir el acceso a recursos con los \textit{control groups}.
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+\pagenumbering{arabic}
+
+\section{Introducción}
+\input{content/1/introduction.tex}
+\subsection{¿Qué es Docker?}
+\input{content/1/what-is-docker.tex}
+\subsection{\textit{Real--life usages}}
+\input{content/1/real-life-usages.tex}
+\subsection{\textit{Docker rules}}
+\input{content/1/docker-rules.tex}
+
+\section{Docker}
+\input{content/2/docker.tex}
+\subsection{Estructura de un Docker}
+\input{content/2/structure.tex}
+\subsection{Creación de un contenedor}
+\input{content/2/creation.tex}
+\subsection{Comunicación entre contenedores}
+\input{content/2/communication.tex}
+\subsection{Despliegue de aplicaciones multi--contenedores. \texttt{docker-compose}}\label{sec:compose}
+\input{content/2/compose.tex}
+\subsection{``Orquestación'' de contenedores}\label{sec:swarm}
+\input{content/2/orchestration.tex}
+\subsection{Líneas futuras de desarrollo e innovación}
+\input{content/2/future.tex}
+
+\section{Seguridad en Docker}\label{sec:security}
+\input{content/3/security.tex}
+\subsection{Análisis de la pila Docker}
+\input{content/3/docker-inside.tex}
+\subsection{Diferencias fundamentales con \texttt{chroot}}
+\input{content/3/chroot.tex}
+\subsection{Seguridad en las comunicaciones de red -- \textit{firewall}}
+\input{content/3/firewall.tex}
+\subsection{Conclusiones}
+\input{content/3/conclusions.tex}
+
+\newpage
+\printbibliography[heading=bibintoc]
+
+\appendix
+
+\end{document}
